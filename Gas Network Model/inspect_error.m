@@ -1,4 +1,5 @@
 %% plot error
+close all;
 for num_observable = 1 : size(model.verify(1).error_x, 2)
     figure(num_observable);
     for num_pipeline = 1 : size(model.verify,1)
