@@ -42,11 +42,10 @@ end
 
 %% normalization
 fprintf('%s\n', '------------------- Normalization ----------------------');
-model.data.basevalue_M = 3;
+model.data.basevalue_M = 5;
 model.data.basevalue_P = 5*1e6;
 
 for k_pipeline = 1 : num_pipeline
-
     model.data.pipeline(k_pipeline,1).Min_normalized = ...
         model.data.pipeline(k_pipeline,1).Min/model.data.basevalue_M;
     model.data.pipeline(k_pipeline,1).Mout_normalized = ...

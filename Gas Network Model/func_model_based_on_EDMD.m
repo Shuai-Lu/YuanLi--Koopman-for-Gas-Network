@@ -13,56 +13,59 @@ t0 = clock;
 global data model;
 num_trainingsample = data.settings.num_trainingsample;% 300
 num_testsample = data.settings.num_testsample;%200
-model_order = data.settings.model_order;%2，供回水网络是不同的A
-model_order_u = data.settings.model_order_u;%2，供回水网络是不同的A
-num_pipeline = size(data.var.Min,2);%50管道
+model_order = data.settings.model_order;%2，
+model_order_u = data.settings.model_order_u;%2，
+num_pipeline = size(data.var.Min,2);
 
 %% 
 %% select observables and reformulate
 fprintf('%s\n', '------------------- Start ----------------------');
 fprintf('%s\n', '----------------- Select observables -------------------');
 for k_pipeline = 1 : num_pipeline
-    model.data.pipeline(k_pipeline,1).x = [];
-    
+    model.data.pipeline(k_pipeline,1).x_P = [];
+    model.data.pipeline(k_pipeline,1).x_M = [];
+
     %% select observables
     k_sample = 1 : num_trainingsample + num_testsample;
     % % x Choose one
 
-    x = model.data.pipeline(k_pipeline,1).Pout_normalized(k_sample, 1);
-    y = model.data.pipeline(k_pipeline,1).Mout_normalized(k_sample, 1);
+    x_P = model.data.pipeline(k_pipeline,1).Pout_normalized(k_sample, 1);
+    x_M = model.data.pipeline(k_pipeline,1).Mout_normalized(k_sample, 1);
 
-    model.data.pipeline(k_pipeline,1).x(k_sample,1) = func_observable_generator(x, 'linear');
-    model.data.pipeline(k_pipeline,1).y(k_sample,1) = func_observable_generator(y, 'linear');
-        model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'quadratic');
-        model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'quadratic');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'cubic');
-%         model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'cubic');
-    model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'inverse');
-    % model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'inverse');
-    %     model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'exp');
-    model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(-x, 'exp');
-    model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(-y, 'exp');
-%     model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'log');
-%     model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'log');
-    %     model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x.^2, 'exp');
-        % model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(-x.^2, 'exp');
-    %     model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(2*x, 'exp');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(-2*x, 'exp');
-        model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'sin');
-        model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'sin');
-        model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'xsin');
-        model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'xsin');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'cos');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(-x, 'expsin');
-%         model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(-y, 'expcos');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'xsin');
-        model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'xcos');
-        model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'xcos');
-%         model.data.pipeline(k_pipeline,1).y(k_sample,end+1) = func_observable_generator(y, 'inverse*e^x');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'radialbasis1');
-%         model.data.pipeline(k_pipeline,1).x(k_sample,end+1) = func_observable_generator(x, 'radialbasis2');
+    model.data.pipeline(k_pipeline,1).x_P(k_sample,1) = func_observable_generator(x_P, 'linear');
+    model.data.pipeline(k_pipeline,1).x_M(k_sample,1) = func_observable_generator(x_M, 'linear');
+        model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'quadratic');
+        model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'quadratic');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'cubic');
+%         model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'cubic');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'inverse');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'inverse');
+        % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'exp');
+    model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'exp');
+    model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'exp');
+%     model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'log');
+%     model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'log');
+    %     model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P.^2, 'exp');
+        % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P.^2, 'exp');
+    %     model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(2*x_P, 'exp');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-2*x_P, 'exp');
+        model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'sin');
+        % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'sin');
+        model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xsin');
+        model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xsin');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'cos');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'expsin');
+%         model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'expcos');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xsin');
+        % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xcos');
+        % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xcos');
+%         model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'inverse*e^x_P');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'radialbasis1');
+%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'radialbasis2');
 
-
+    model.data.pipeline(k_pipeline,1).x(k_sample,:) = ...
+        [model.data.pipeline(k_pipeline,1).x_M(k_sample,:) ...
+        model.data.pipeline(k_pipeline,1).x_P(k_sample,:)];
     %% u
     % 状态量为Min时，可不可以取输入model.data.pipeline(k_pipeline,1).Pout_normalized(k_sample, :)
     model.data.pipeline(k_pipeline,1).u(k_sample, :) = [ ...
@@ -77,25 +80,26 @@ k_sample = 1 : num_trainingsample + num_testsample;
 for k_pipeline =  1 : num_pipeline
     fprintf('%s%d%s\n', '--------------------- Pipeline: ', k_pipeline, ' ----------------------');
     model.EDMD(k_pipeline,1) =...
-        func_multi_order_EDMD(model.data.pipeline(k_pipeline,1).x(k_training,:), ...
+        func_multi_order_EDMD_benchmark(...
+        model.data.pipeline(k_pipeline,1).x(k_training,:), ...        
         model.data.pipeline(k_pipeline,1).u(k_training,:), ...
-        model.data.pipeline(k_pipeline,1).y(k_training,:), ...
+        [], ...
         model_order, model_order_u);
 
     % %
-    model.verify(k_pipeline,1) = ...
-        func_EDMD_verify(model.data.pipeline(k_pipeline,1).x(k_sample,:), ...
-        model.data.pipeline(k_pipeline,1).u(k_sample,:),  ...
-        model.data.pipeline(k_pipeline,1).y(k_sample,:), ...
-        model_order, ...
-        model.EDMD(k_pipeline,1), ...
-        num_trainingsample,model_order_u);
+    % model.verify(k_pipeline,1) = ...
+    %     func_EDMD_verify(model.data.pipeline(k_pipeline,1).x_P(k_sample,:), ...
+    %     model.data.pipeline(k_pipeline,1).u(k_sample,:),  ...
+    %     model.data.pipeline(k_pipeline,1).x_M(k_sample,:), ...
+    %     model_order, ...
+    %     model.EDMD(k_pipeline,1), ...
+    %     num_trainingsample,model_order_u);
 
     
     %% plot - error_y
 %     
-%     cmap = brewermap(size(model.verify(1,1).x,2), 'set1');
-%     num_fig_row = size(model.verify(1,1).x,2);
+%     cmap = brewermap(size(model.verify(1,1).x_P,2), 'set1');
+%     num_fig_row = size(model.verify(1,1).x_P,2);
 %     num_fig_col = 1;
 %     num_subfig = 0;
 %     h_fig = figure(1);
