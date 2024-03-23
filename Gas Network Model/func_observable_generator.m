@@ -27,6 +27,9 @@ switch type
     case 'exp'
         y = exp(x);
 
+    case 'xexp'
+        y = x .* exp(x);
+
     case 'sin'
         y = sin(x);
     case 'cos'

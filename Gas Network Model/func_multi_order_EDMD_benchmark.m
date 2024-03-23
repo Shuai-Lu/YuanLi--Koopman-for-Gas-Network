@@ -71,13 +71,13 @@ if  ~ isempty(x)
     %% solve
     EDMD.ops = sdpsettings('solver', 'mosek', 'verbose', 0);
     EDMD.sol.x = optimize(EDMD.cons, EDMD.var.obj_x, EDMD.ops);
-    fprintf('%s\n', EDMD.sol.x.info);
-    if EDMD.sol.x.problem
-        return;
+    if ~ EDMD.sol.x.problem
+        fprintf('%s\n', EDMD.sol.x.info);
+    else
+        error(EDMD.sol.x.info);
     end
     fprintf('%s%.4f%s\n\n', 'Solver time: ', EDMD.sol.x.solvertime, 's');
     EDMD.var = myFun_GetValue(EDMD.var, 'DisplayTime', 0);
-    % temp = EDMD.var;
 end
 
 
@@ -145,16 +145,12 @@ if ~ isempty(y)
     EDMD.ops = sdpsettings('solver', 'mosek', 'verbose', 0);
     EDMD.ops.gurobi.NumericFocus = 1;
     EDMD.sol.y = optimize(EDMD.cons, EDMD.var.obj_y, EDMD.ops);
-    fprintf('%s\n', EDMD.sol.y.info);
-    if EDMD.sol.y.problem
-        EDMD.ops = sdpsettings('solver', 'gurobi', 'verbose', 0);
-        EDMD.sol.y = optimize(EDMD.cons, EDMD.var.obj_y, EDMD.ops);
-        if EDMD.sol.y.problem
-            return;
-        end
+    if ~ EDMD.sol.y.problem
+        fprintf('%s\n', EDMD.sol.y.info);
+    else
+        error(EDMD.sol.y.info);
     end
     fprintf('%s%.4f%s\n\n', 'Solver time: ', EDMD.sol.y.solvertime, 's');
     EDMD.var = myFun_GetValue(EDMD.var, 'DisplayTime', 0);
-
 end
 end

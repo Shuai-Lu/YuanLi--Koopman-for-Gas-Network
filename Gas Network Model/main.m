@@ -33,9 +33,8 @@ data.settings.model_order_u = model_order_u;
 %% data processing
 for k_pipeline = 1 : num_pipeline
     model.data.pipeline(k_pipeline,1).Min = data.var.Min(:,k_pipeline);
-    model.data.pipeline(k_pipeline,1).Pin = data.var.Pin(:,k_pipeline);
-
     model.data.pipeline(k_pipeline,1).Mout = data.var.Mout(:,k_pipeline);
+    model.data.pipeline(k_pipeline,1).Pin = data.var.Pin(:,k_pipeline);
     model.data.pipeline(k_pipeline,1).Pout = data.var.Pout(:,k_pipeline);
 
 end
@@ -43,18 +42,26 @@ end
 %% normalization
 fprintf('%s\n', '------------------- Normalization ----------------------');
 model.data.basevalue_M = 5;
-model.data.basevalue_P = 5*1e6;
+model.data.basevalue_P = 5e6;
 
 for k_pipeline = 1 : num_pipeline
     model.data.pipeline(k_pipeline,1).Min_normalized = ...
         model.data.pipeline(k_pipeline,1).Min/model.data.basevalue_M;
     model.data.pipeline(k_pipeline,1).Mout_normalized = ...
         model.data.pipeline(k_pipeline,1).Mout/model.data.basevalue_M;
-
     model.data.pipeline(k_pipeline,1).Pin_normalized = ...
         model.data.pipeline(k_pipeline,1).Pin/model.data.basevalue_P;
     model.data.pipeline(k_pipeline,1).Pout_normalized = ...
         model.data.pipeline(k_pipeline,1).Pout/model.data.basevalue_P;
+
+    % model.data.pipeline(k_pipeline,1).Min_normalized = ...
+    %     mapminmax(model.data.pipeline(k_pipeline,1).Min, 0, 1);
+    % model.data.pipeline(k_pipeline,1).Mout_normalized = ...
+    %     mapminmax(model.data.pipeline(k_pipeline,1).Mout, 0, 1);
+    % model.data.pipeline(k_pipeline,1).Pin_normalized = ...
+    %     mapminmax(model.data.pipeline(k_pipeline,1).Pin, 0, 1);
+    % model.data.pipeline(k_pipeline,1).Pout_normalized = ...
+    %     mapminmax(model.data.pipeline(k_pipeline,1).Pout, 0, 1);
 end
 
 %% --------------------------------------------
