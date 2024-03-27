@@ -59,14 +59,15 @@ if  ~ isempty(x)
     % % stability cons
     for k_order = 2 : model_order_x + 1
         EDMD.cons = EDMD.cons + (...
-            norm(EDMD.var.A(:,:,k_order), 2) <= 1);
+            norm(EDMD.var.A(:,:,k_order), 2) <= 1 - 1e-2);   % 0.99
         EDMD.var.norm_A(k_order,1) = norm(EDMD.var.A(:,:,k_order), 2);
     end
 
-    EDMD.cons = EDMD.cons + ((sum(EDMD.var.norm_A) <= 1));
+    EDMD.cons = EDMD.cons + ((sum(EDMD.var.norm_A) <= 1 - 1e-2));  % 0.99
 
     %% define obj
     EDMD.var.obj_x = sum(reshape(EDMD.var.error_x, 1, []) .^2);
+    % EDMD.var.obj_x = sum(reshape(EDMD.var.error_x(:,1:2), 1, []) .^2);
 
     %% solve
     EDMD.ops = sdpsettings('solver', 'mosek', 'verbose', 0);

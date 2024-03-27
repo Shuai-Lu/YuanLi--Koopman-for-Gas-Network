@@ -1,6 +1,6 @@
 function func_readdata(filename)
 %%
-fprintf('%-40s\t\t', '- Reading data ...');
+fprintf('%-40s\n', '- Reading data ...');
 t0 = clock;
 
 %%
