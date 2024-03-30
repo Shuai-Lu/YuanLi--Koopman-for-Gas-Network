@@ -6,28 +6,31 @@ warning off;
 global data model;
 
 %% read data
-
-filename = 'testdata_t60'; 
+filename = 'testdata_t15'; 
 func_readdata(filename); % 1-updata, 0-remain
-
 num_pipeline = size(data.var.Min,2);% 50个管道
 
-num_trainingsample = 800;% delta_t = 30,换成1600；delta_t = 15,换成3200；
+set_num_trainingsample = [800 1600 3200];
+set_num_testsample = [800 1600 3200];
+set_model_order_x = [2 3 4];
+set_model_order_u = [2 2 2];
+if strcmp(filename(end-1:end), '15')
+    idx = 1;
+elseif strcmp(filename(end-1:end), '30')
+    idx = 2;
+elseif strcmp(filename(end-1:end), '60')
+    idx = 3;
+end
 
-num_testsample = 800; % delta_t = 30,换成1600；delta_t = 15,换成3200；
-
-nd_t15 = 4;nd_t30 = 3;nd_t60 = 2;
-
-nd_u15 = 2;nd_u30 = 2;nd_u60 = 2;
-
-nd = nd_t60; % 不同delta_t, 换
-model_order_u = nd_u60;
-model_order = nd + 1;
+num_trainingsample = set_num_trainingsample(idx);
+num_testsample = set_num_testsample(idx);
+model_order_x = set_model_order_x(idx) + 1;
+model_order_u = set_model_order_u(idx);
 
 %%
 data.settings.num_trainingsample = num_trainingsample;
 data.settings.num_testsample = num_testsample;
-data.settings.model_order = model_order;
+data.settings.model_order_x = model_order_x;
 data.settings.model_order_u = model_order_u;
 
 %% data processing
