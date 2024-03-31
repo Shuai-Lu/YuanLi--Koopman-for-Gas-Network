@@ -6,19 +6,19 @@ warning off;
 global data model;
 
 %% read data
-filename = 'testdata_t15'; 
+filename = 'testdata_t30'; 
 func_readdata(filename); % 1-updata, 0-remain
 num_pipeline = size(data.var.Min,2);% 50个管道
 
-set_num_trainingsample = [800 1600 3200];
-set_num_testsample = [800 1600 3200];
+set_num_trainingsample = 9/10 * [1600 3200 6400];
+set_num_testsample = 1/10 * [1600 3200 6400];
 set_model_order_x = [2 3 4];
-set_model_order_u = [2 2 2];
-if strcmp(filename(end-1:end), '15')
+set_model_order_u = [2 2 3];
+if strcmp(filename(end-1:end), '60')
     idx = 1;
 elseif strcmp(filename(end-1:end), '30')
     idx = 2;
-elseif strcmp(filename(end-1:end), '60')
+elseif strcmp(filename(end-1:end), '15')
     idx = 3;
 end
 
@@ -44,8 +44,10 @@ end
 
 %% normalization
 fprintf('%s\n', '------------------- Normalization ----------------------');
-model.data.basevalue_M = 5;
+% 5e6 & 5 is Ok.
 model.data.basevalue_P = 5e6;
+model.data.basevalue_M = 5;
+
 
 for k_pipeline = 1 : num_pipeline
     model.data.pipeline(k_pipeline,1).Min_normalized = ...

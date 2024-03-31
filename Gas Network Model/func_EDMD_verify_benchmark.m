@@ -105,10 +105,11 @@ end
 %%
     function y = myabs(x)
         [num_row, num_col] = size(x);
-        x = reshape(x, 1, []);
-        y = [abs(x); ones(1, num_row*num_col)];
-        y = max(y);
-        y = reshape(y, num_row, num_col, []);
+        y = abs(x);
+        % x = reshape(x, 1, []);
+        % y = [abs(x); ones(1, num_row*num_col)];
+        % y = max(y);
+        % y = reshape(y, num_row, num_col, []);
     end
 end
 

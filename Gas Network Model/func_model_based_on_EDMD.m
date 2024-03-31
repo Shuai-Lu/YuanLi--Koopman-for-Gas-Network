@@ -13,7 +13,7 @@ t0 = clock;
 global data model;
 num_trainingsample = data.settings.num_trainingsample;% 300
 num_testsample = data.settings.num_testsample;%200
-model_order = data.settings.model_order;%2，
+model_order_x = data.settings.model_order_x;%2，
 model_order_u = data.settings.model_order_u;%2，
 num_pipeline = size(data.var.Min,2);
 
@@ -28,21 +28,43 @@ for k_pipeline = 1 : num_pipeline
     %% select observables
     k_sample = 1 : num_trainingsample + num_testsample;
     % % x Choose one
-
     x_P = model.data.pipeline(k_pipeline,1).Pout_normalized(k_sample, 1);
     x_M = model.data.pipeline(k_pipeline,1).Mout_normalized(k_sample, 1);
 
     model.data.pipeline(k_pipeline,1).x_P(k_sample,1) = func_observable_generator(x_P, 'linear');
     model.data.pipeline(k_pipeline,1).x_M(k_sample,1) = func_observable_generator(x_M, 'linear');
+    model.data.pipeline(k_pipeline,1).x0(k_sample,:)  = ...
+        [model.data.pipeline(k_pipeline,1).x_P(k_sample,:) ...
+        model.data.pipeline(k_pipeline,1).x_M(k_sample,:)];
+
+    %%
     % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'quadratic');
+    model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'exp');
+    model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'xexp');
+    model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'sin');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xsin');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'cos');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xcos');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'expsin');
+    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'expcos');
+
     % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'quadratic');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'exp');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'xexp');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'sin');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xsin');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'cos');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xcos');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'expsin');
+    % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'expcos');
+
         % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'cubic');
         % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'cubic');
     % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'inverse');
     % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'inverse');
         % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'exp');
-    % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'exp');
-    model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'exp'); % 这个不存留的话，M会出现负值
+    
+    
         % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xexp');
 %     model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'log');
 %     model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'log');
@@ -52,26 +74,24 @@ for k_pipeline = 1 : num_pipeline
 %         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-2*x_P, 'exp');
         % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'sin');
         % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'sin');
-        model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xsin');
-        model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xsin');
-%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'cos');
-%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'expsin');
-%         model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'expcos');
-%         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xsin');
-        model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'xcos');
-        model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'xcos');
+                
+        % model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(-x_P, 'expsin');
+        % model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(-x_M, 'expsin');
+        
+        
 %         model.data.pipeline(k_pipeline,1).x_M(k_sample,end+1) = func_observable_generator(x_M, 'inverse*e^x_P');
 %         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'radialbasis1');
 %         model.data.pipeline(k_pipeline,1).x_P(k_sample,end+1) = func_observable_generator(x_P, 'radialbasis2');
 
     model.data.pipeline(k_pipeline,1).x(k_sample,:) = ...
-        [model.data.pipeline(k_pipeline,1).x_M(k_sample,:) ...
-        model.data.pipeline(k_pipeline,1).x_P(k_sample,:)];
+        [model.data.pipeline(k_pipeline,1).x0(k_sample,:) ...
+        model.data.pipeline(k_pipeline,1).x_P(k_sample,2:end) ...
+        model.data.pipeline(k_pipeline,1).x_M(k_sample,2:end)];
     %% u
     % 状态量为Min时，可不可以取输入model.data.pipeline(k_pipeline,1).Pout_normalized(k_sample, :)
     model.data.pipeline(k_pipeline,1).u(k_sample, :) = [ ...
-        model.data.pipeline(k_pipeline,1).Min_normalized(k_sample, :) ...
         model.data.pipeline(k_pipeline,1).Pin_normalized(k_sample, :)...
+        model.data.pipeline(k_pipeline,1).Min_normalized(k_sample, :) ...
         ];
 end
 
@@ -85,7 +105,7 @@ for k_pipeline =  1 : num_pipeline
         model.data.pipeline(k_pipeline,1).x(k_training,:), ...        
         model.data.pipeline(k_pipeline,1).u(k_training,:), ...
         [], ...
-        model_order, model_order_u);
+        model_order_x, model_order_u);
 
     % %
     model.verify(k_pipeline,1) = ...
@@ -93,7 +113,7 @@ for k_pipeline =  1 : num_pipeline
         model.data.pipeline(k_pipeline,1).x(k_sample,:), ...
         model.data.pipeline(k_pipeline,1).u(k_sample,:), ...
         [], ...
-        model_order, model_order_u, ...
+        model_order_x, model_order_u, ...
         model.EDMD(k_pipeline,1), ...
         num_trainingsample);
 
