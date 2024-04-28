@@ -62,7 +62,8 @@ if  ~ isempty(x)
     EDMD.var.sys_matrix = [reshape(EDMD.var.A(:,:,2:end), num_x, []); 
        eye(num_x*(model_order_x-1)) zeros(num_x*(model_order_x-1), num_x)];
     EDMD.cons = EDMD.cons + (( ...
-        norm(EDMD.var.sys_matrix,2) <= 1));
+        norm(EDMD.var.sys_matrix,2) <= 0.999));
+    EDMD.var.norm = norm(EDMD.var.sys_matrix,2);
 
     % EDMD.var.stability_flag = ...
     %     [EDMD.var.P  EDMD.var.sys_matrix*EDMD.var.P
