@@ -10,10 +10,10 @@ filename = 'testdata_t30';
 func_readdata(filename); % 1-updata, 0-remain
 num_pipeline = size(data.var.Min,2);% 50个管道
 
-set_num_trainingsample = 9/10 * [1600 3200 6400];
-set_num_testsample = 1/10 * [1600 3200 6400];
-set_model_order_x = [2 3 4];
-set_model_order_u = [2 2 3];
+set_num_trainingsample = 8/10 * [1600 3200 6400];
+set_num_testsample = 2/10 * [1600 3200 6400];
+set_model_order_x = [1 3 4];
+set_model_order_u = [1 2 3];
 if strcmp(filename(end-1:end), '60')
     idx = 1;
 elseif strcmp(filename(end-1:end), '30')
@@ -24,7 +24,7 @@ end
 
 num_trainingsample = set_num_trainingsample(idx);
 num_testsample = set_num_testsample(idx);
-model_order_x = set_model_order_x(idx) + 1;
+model_order_x = set_model_order_x(idx);
 model_order_u = set_model_order_u(idx);
 
 %%
