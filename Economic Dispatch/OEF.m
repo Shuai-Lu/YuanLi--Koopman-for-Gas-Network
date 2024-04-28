@@ -6,7 +6,7 @@ global data model;
 
 
 %%
-data.settings.num_period = 2;
+data.settings.num_period = 24;
 data.settings.time_interval = 1;
 data.settings.time_interval_ngs = 1;
 data.settings.time_interval_ngs_second = 3600;
@@ -27,17 +27,18 @@ model.oef.var = [];
 model.oef.cons = [];
 
 %%
-% model_eps();
+model_eps();
 
 %% choose
+% model_gas_Koopman_linear( ); %
+% model_gas_Koopman( ); %
+model_gas_Diff( ); %
 
-model_gas_Koopman_0313try( ); %
-% model_gas_Diff( ); %
-
+%%
 model_couple( );
 
 %% obj
-% model.oef.obj_e = sum(model.oef.var.eps.cost_gen(:));
+model.oef.obj_e = ((sum(model.oef.var.eps.cost_gen(:))))*7.2;
 
 model.oef.obj_g = sum(model.oef.var.ngs.cost_source(:));
 
