@@ -10,3 +10,5 @@ read_data('testdata_30bus.xlsx','20nodes.xlsx', 1); % 1: filename; 2: flag_clear
 OEF();
 fprintf('\n');
 myFun_GetValue(model.oef.var);
+
+% interpolated( );
