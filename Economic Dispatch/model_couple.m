@@ -22,9 +22,17 @@ eta_p2g = data.eps.device(index_p2g, 8);
 
 % gt
 
-model.oef.cons = model.oef.cons + ( ...
-    model.oef.var.eps.P_gt == ...
-    model.oef.var.eps.Mtemp_gt .* (ones(num_period,1)*eta_gt));
+% model.oef.cons = model.oef.cons + ( ...
+%     model.oef.var.eps.P_gt == ...
+%     model.oef.var.eps.Mtemp_gt .* (ones(num_period,1)*eta_gt));
+
+for n = 1:num_gt
+    for t = 1 : num_period
+        model.oef.cons = model.oef.cons + ( ...
+            sum(model.oef.var.eps.M_gt(mul*(t-1)+1 : mul*t,n)*time_interval_ngs)/time_interval_elec* eta_gt(n,1) == ...
+            model.oef.var.eps.P_gt(t,n)  );
+    end
+end
 
 % p2g
 for n = 1:num_p2g
