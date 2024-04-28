@@ -2,9 +2,6 @@
 function model_gas_Diff( )
 global data model;
 % %
-% train_data = load('Koopman_Matrix_20ngs.mat');
-% train_data = train_data.model;
-
 loc = data.loc.ngs;
 
 % % - Data
@@ -18,21 +15,7 @@ num_period_ngs = data.settings.num_period*time_interval_elec/time_interval_ngs;
 num_start = num_initialtime + 1;
 num_end = num_initialtime + num_period_ngs;
 mul = 1/time_interval_ngs;
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
-% % coupled units
-index_gt = find(data.eps.device(:,2) == 3);
-index_p2g = find(data.eps.device(:,2) == 4);
-num_gt = size(index_gt,1);
-num_p2g = size(index_p2g,1);
 
-model.oef.var.eps.M_gt = sdpvar(num_period_ngs, num_gt, 'full');
-model.oef.var.eps.Mtemp_gt = sdpvar(num_period, num_gt, 'full');
-model.oef.var.eps.P_gt = sdpvar(num_period , num_gt, 'full');
-% model.oef.var.eps.cost_gt = sdpvar(num_period , num_gt, 'full');
-
-model.oef.var.eps.M_p2g = sdpvar(num_period_ngs , num_p2g, 'full');
-model.oef.var.eps.P_p2g = sdpvar(num_period , num_p2g, 'full');
-% model.oef.var.eps.cost_p2g = sdpvar(num_period , num_p2g, 'full');
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % 50 DHN with same structure
 num_pipe = size(data.ngs.pipe,1); % 50
@@ -41,7 +24,7 @@ indexset_source = data.ngs.source(:, loc.source.nodeID); % 1
 num_source = size(indexset_source,1); % 26
 ID_source = data.ngs.node(indexset_source, loc.node.ID);
 indexset_nonsource = setdiff(1:num_node, indexset_source); % 2:51
-indexset_load = find(data.ngs.node(:, loc.node.load) >= 0); % 26*1 loads
+indexset_load = data.profile.bus_gasload; % 26*1 loads
 ID_load = data.ngs.node(indexset_load, loc.node.ID);
 indexset_nonload = setdiff(1:num_node, indexset_load); % 25
 num_load = size(indexset_load,1); % 26
@@ -74,52 +57,40 @@ model.oef.var.ngs.Lp = sdpvar(num_period_ngs, num_pipe, 'full'); % loss
 model.oef.var.ngs.cost_source = sdpvar(num_period_ngs,  1, 'full'); % 24*54
 
 %% Initialize variable
-filename = 'output'; 
-Min = xlsread(filename,1,'C2:BB10000');data.his.Min = Min;
-Pin = xlsread(filename,2,'C2:BB10000');data.his.Pin = Pin;
-Mout = xlsread(filename,3,'C2:BB10000');data.his.Mout = Mout;
-Pout = xlsread(filename,4,'C2:BB10000');data.his.Pout = Pout;
-Pn = xlsread(filename,5,'C2:BB10000');data.his.Pn = Pn;
+filename = 'steady state'; 
+Min = xlsread(filename,1,'A2:BB10000');data.his.Min = Min;
+Pin = xlsread(filename,2,'A2:BB10000');data.his.Pin = Pin*1e6;
+Mout = xlsread(filename,3,'A2:BB10000');data.his.Mout = Mout;
+Pout = xlsread(filename,4,'A2:BB10000');data.his.Pout = Pout*1e6;
 
 for i = 1:num_pipe
     for j = 1:num_initialtime_ngs
-%         model.oef.var.ngs.Min(mul*(j-1)+1 : mul*j , i) = ...
-%             data.his.Min(j,i);
-%         model.oef.var.ngs.Mout(mul*(j-1)+1 : mul*j , i) = ...
-%             data.his.Mout(j,i);
-%         model.oef.var.ngs.Pin(mul*(j-1)+1 : mul*j , i) = ...
-%             data.his.Pin(j,i);
-%         model.oef.var.ngs.Pout(mul*(j-1)+1 : mul*j , i) = ...
-%             data.his.Pout(j,i);
-        model.oef.var.ngs.Min(mul*(j-1)+1 : mul*j , i) = ...
-            10;
-        model.oef.var.ngs.Mout(mul*(j-1)+1 : mul*j , i) = ...
-            10;
-        model.oef.var.ngs.Pin(mul*(j-1)+1 : mul*j , i) = ...
-            6000000;
-        model.oef.var.ngs.Pout(mul*(j-1)+1 : mul*j , i) = ...
-            6000000;
 
-    end
-end
-for i = 1:num_node
-    for j = 1:num_initialtime_ngs
-        model.oef.var.ngs.Pnode(mul*(j-1)+1 : mul*j , i) = ...
-            data.his.Pn(j,i);
+        model.oef.var.ngs.Min(mul*(j-1)+1 : mul*j , i) = ...
+            data.his.Min(j,i);
+        model.oef.var.ngs.Mout(mul*(j-1)+1 : mul*j , i) = ...
+            data.his.Mout(j,i);
+        model.oef.var.ngs.Pin(mul*(j-1)+1 : mul*j , i) = ...
+            data.his.Pin(j,i);
+        model.oef.var.ngs.Pout(mul*(j-1)+1 : mul*j , i) = ...
+            data.his.Pout(j,i);
+
     end
 end
 
 model.oef.var.ngs.Msource(1:num_initialtime,:) = 0;
-
+model.oef.var.ngs.Pnode(1:num_initialtime,:) = 0;
 %% 
 %% Temperature quasi-dynamic
 % % --------------------------------------- Diff-Begin -----------------------------------------------------------
 dx = 2000;
 Nx = ceil(Len/dx);
-filename = 'testdata_t15'; 
-V_Min = xlsread(filename,3,'B12:T12');   V_Pin = xlsread(filename,1,'B12:T12');
-V_Mout = xlsread(filename,4,'B12:T12');  V_Pout = xlsread(filename,2,'B12:T12');
-average_v = 2*D.*A./lamta./(1/2*(V_Min+V_Mout)').*abs(V_Pout-V_Pin)'./Len;
+
+% filename = 'testdata_t15'; 
+% V_Min = xlsread(filename,3,'B12:T12');   V_Pin = xlsread(filename,1,'B12:T12');
+% V_Mout = xlsread(filename,4,'B12:T12');  V_Pout = xlsread(filename,2,'B12:T12');
+% average_v = 2*D.*A./lamta./(1/2*(V_Min+V_Mout)').*abs(V_Pout-V_Pin)'./Len;
+average_v = 1*ones(19,1);
 
 dt = time_interval_ngs * 3600;
 for k = 1 : num_pipe
@@ -260,7 +231,7 @@ for n = 1 : num_node
             ( model.oef.var.ngs.Pnode(t,n) <= model.oef.var.ngs.Pin(t,down_pipe(k,1))) : ...
             'Pn = Pin(:,down_pipe)');
         model.oef.cons = model.oef.cons + ( ...
-            ( model.oef.var.ngs.Pin(t,down_pipe(k,1)) <= model.oef.var.ngs.Pnode(t,n) * ratio(k,1)) : ...
+            ( model.oef.var.ngs.Pin(t,down_pipe(k,1)) <= model.oef.var.ngs.Pnode(t,n) * ratio(n,1)) : ...
             'Pn = Pin(:,down_pipe)');
     end
 end
@@ -297,16 +268,16 @@ Psource = data.ngs.source(:,loc.source.Pressure);
 P_p2g = data.eps.device(index_p2g,13);
 P_gt = data.eps.device(index_gt,13);
 model.oef.cons = model.oef.cons + ( ...
-    ( 0.8*ones(num_period_ngs,1)*Psource' <= model.oef.var.ngs.Pnode(t, ID_source) <= ...
-    1.2*ones(num_period_ngs,1)*Psource' ) : ...
+    ( 0.95*ones(num_period_ngs,1)*Psource' <= model.oef.var.ngs.Pnode(t, ID_source) <= ...
+    1.05*ones(num_period_ngs,1)*Psource' ) : ...
     'Psource');
 model.oef.cons = model.oef.cons + ( ...
-    ( 0.8*ones(num_period_ngs,1)*P_p2g' <= model.oef.var.ngs.Pnode(t, nodeID_p2g) <= ...
-    1.2*ones(num_period_ngs,1)*P_p2g' ) : ...
+    ( 0.95*ones(num_period_ngs,1)*P_p2g' <= model.oef.var.ngs.Pnode(t, nodeID_p2g) <= ...
+    1.05*ones(num_period_ngs,1)*P_p2g' ) : ...
     'Psource');   
 model.oef.cons = model.oef.cons + ( ...
-    ( 0.8*ones(num_period_ngs,1)*P_gt' <= model.oef.var.ngs.Pnode(t, nodeID_gt) <= ...
-    1.2*ones(num_period_ngs,1)*P_gt' ) : ...
+    ( 0.95*ones(num_period_ngs,1)*P_gt' <= model.oef.var.ngs.Pnode(t, nodeID_gt) <= ...
+    1.05*ones(num_period_ngs,1)*P_gt' ) : ...
     'Psource');  
 
 % source and p2g, gt 处的输入Min,Pin在1h内是固定不变的
@@ -329,26 +300,35 @@ for t = 1 : num_period
             ( model.oef.var.ngs.Pnode(mul*(t + num_initialtime_ngs - 1)+1,nodeID_p2g) == ...
             model.oef.var.ngs.Pnode(mul*(t + num_initialtime_ngs - 1) + k ,nodeID_p2g) ) : ...
             '4 P_p2g stay the same');
+
+        model.oef.cons = model.oef.cons + ( ...
+            ( model.oef.var.eps.M_gt(mul*(t - 1)+1,:) == ...
+            model.oef.var.eps.M_gt(mul*(t - 1) + k ,:) ) : ...
+            '4 Mp2g stay the same');
+        model.oef.cons = model.oef.cons + ( ...
+            ( model.oef.var.ngs.Pnode(mul*(t + num_initialtime_ngs - 1)+1,nodeID_gt) == ...
+            model.oef.var.ngs.Pnode(mul*(t + num_initialtime_ngs - 1) + k ,nodeID_gt) ) : ...
+            '4 P_p2g stay the same');
     end
 end
 
 % % model of the M_GT
-M0=0;
-for t = 1 : num_period
-    if t==1
-        model.oef.cons = model.oef.cons + ( ...
-            ( model.oef.var.eps.Mtemp_gt(t,:) == ...
-            1/2/mul*(M0 + sum(model.oef.var.eps.M_gt(mul*(t-1)+1 : mul*t,:),1) + ...
-            sum(model.oef.var.eps.M_gt(mul*(t-1)+1:mul*t-1,:) ,1))) : ...
-            '4 M_gt = 1Mtemp_gt, same area,t = 1');
-    else
-        model.oef.cons = model.oef.cons + ( ...
-            (model.oef.var.eps.Mtemp_gt(t,:) == ...
-            1/2/mul*(sum(model.oef.var.eps.M_gt(mul*(t-1):mul*t,:),1) + ...
-            sum(model.oef.var.eps.M_gt(mul*(t-1)+1:mul*t-1,:) ,1)) ) : ...
-            '4 M_gt = 1Mtemp_gt, same area, t>1');
-    end
-end
+% M0=0;
+% for t = 1 : num_period
+%     if t==1
+%         model.oef.cons = model.oef.cons + ( ...
+%             ( model.oef.var.eps.Mtemp_gt(t,:) == ...
+%             1/2/mul*(M0 + sum(model.oef.var.eps.M_gt(mul*(t-1)+1 : mul*t,:),1) + ...
+%             sum(model.oef.var.eps.M_gt(mul*(t-1)+1:mul*t-1,:) ,1))) : ...
+%             '4 M_gt = 1Mtemp_gt, same area,t = 1');
+%     else
+%         model.oef.cons = model.oef.cons + ( ...
+%             (model.oef.var.eps.Mtemp_gt(t,:) == ...
+%             1/2/mul*(sum(model.oef.var.eps.M_gt(mul*(t-1):mul*t,:),1) + ...
+%             sum(model.oef.var.eps.M_gt(mul*(t-1)+1:mul*t-1,:) ,1)) ) : ...
+%             '4 M_gt = 1Mtemp_gt, same area, t>1');
+%     end
+% end
 
 
 % Δt小于1h时，load处应该有一个等式约束
@@ -378,7 +358,6 @@ model.oef.cons = model.oef.cons + ( ...
 model.oef.cons = model.oef.cons + ( ...
     (model.oef.var.ngs.Mout(t,:) <= ...
     data.ngs.pipe(1,loc.pipe.Fmax)) : 'T_node_s >= Tsmin');
-t = num_start : num_end;
 model.oef.cons = model.oef.cons + ( ...
     (model.oef.var.ngs.Min(t,:) >= ...
     1) : 'T_node_s >= Tsmin');
@@ -400,6 +379,10 @@ model.oef.cons = model.oef.cons + ( ...
     (model.oef.var.ngs.Pin(t,:) >= ...
     data.ngs.node(1,loc.node.Pmin)) : 'T_node_s >= Tsmin');
 
+nn = 1:19;
+model.oef.cons = model.oef.cons + ( ...
+    (model.oef.var.ngs.Pin(t,nn) >= ...
+    model.oef.var.ngs.Pout(t,nn)) : 'T_node_s >= Tsmin');
 
 for t = 1 : num_period
     model.oef.cons = model.oef.cons + ( ...
@@ -411,12 +394,9 @@ for t = 1 : num_period
 end
 
 
+
 %% Obj_ngs
 c_gas = 2.5;
-% t = num_start : num_end;
-% model.oef.var.ngs.cost_source(:, :) = ...
-%     ones(num_period_ngs, 1) * data.ngs.source(:,6)' .* ...
-%     (model.oef.var.ngs.Msource(t,:)*dt/0.7174);
 
 model.oef.var.ngs.cost_source = ...
     c_gas*(sum(model.oef.var.ngs.Mload,2) + model.oef.var.eps.M_gt - model.oef.var.eps.M_p2g)*dt/0.7174;
