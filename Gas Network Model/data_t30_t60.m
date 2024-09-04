@@ -3,10 +3,10 @@
     deal(1,2,3,4);
 filename = 'testdata_t15'; 
 %%
-Min = xlsread(filename,sheet_Min,'B10:BB10000');
-Pin = xlsread(filename,sheet_Pin,'B10:BB10000');
-Mout = xlsread(filename,sheet_Mout,'B10:BB10000');
-Pout = xlsread(filename,sheet_Pout,'B10:BB10000');
+Min = xlsread(filename,sheet_Min,'B10:BB550000');
+Pin = xlsread(filename,sheet_Pin,'B10:BB55000');
+Mout = xlsread(filename,sheet_Mout,'B10:BB55000');
+Pout = xlsread(filename,sheet_Pout,'B10:BB55000');
 
 Min_t30  = Min(1:2:end,:);
 Mout_t30  = Mout(1:2:end,:);

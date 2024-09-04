@@ -94,7 +94,7 @@ end
 %% error
 if ~isempty(x)
     verify.error_x = verify.x - x;
-    verify.error_x_relative = (verify.x - x)./ myabs(x);
+    verify.error_x_relative = (verify.x - x)./ myabs(x)*100;
 end
 
 if ~isempty(y)
@@ -105,6 +105,7 @@ end
 %%
     function y = myabs(x)
         [num_row, num_col] = size(x);
+        y = abs(x);
         x = reshape(x, 1, []);
         y = [abs(x); ones(1, num_row*num_col)];
         y = max(y);

@@ -23,6 +23,8 @@ if  ~ isempty(x)
     EDMD.var = [];
     %% define vars
     EDMD.var.A = sdpvar(num_x, num_x, model_order_x + 1, 'full');
+    EDMD.var.P = sdpvar(num_x*model_order_x, num_x*model_order_x);
+    EDMD.var.P_plus = sdpvar(num_x*model_order_x, num_x*model_order_x);
     EDMD.var.B = sdpvar(num_x, num_u, model_order_u + 1, 'full');
     EDMD.var.A_x = sdpvar(num_sample - model_order_x, num_x, model_order_x + 1, 'full');
     EDMD.var.B_u = sdpvar(num_sample - model_order_x, num_x, model_order_u + 1, 'full');
@@ -57,16 +59,23 @@ if  ~ isempty(x)
         )): 'error_x(t) = x(t+model_order) - sum(A(k) * x(t-k)) ');
 
     % % stability cons
-    for k_order = 2 : model_order_x + 1
-        EDMD.cons = EDMD.cons + (...
-            norm(EDMD.var.A(:,:,k_order), 2) <= 1);
-        EDMD.var.norm_A(k_order,1) = norm(EDMD.var.A(:,:,k_order), 2);
+    temp_A = [];
+    c = 0.5;
+    for idx = 2 : model_order_x + 1
+        temp_A = [temp_A (1/c)^(idx-2) * EDMD.var.A(:,:,idx)];
     end
 
-    EDMD.cons = EDMD.cons + ((sum(EDMD.var.norm_A) <= 1));
+    EDMD.var.sys_matrix = [temp_A; 
+       c * eye(num_x*(model_order_x-1)) zeros(num_x*(model_order_x-1), num_x)];
+
+    EDMD.cons = EDMD.cons + (( ...
+        norm(EDMD.var.sys_matrix, 2) <= 0.999));
+
+
 
     %% define obj
     EDMD.var.obj_x = sum(reshape(EDMD.var.error_x, 1, []) .^2);
+    % EDMD.var.obj_x = sum(reshape(EDMD.var.error_x(:,1:2), 1, []) .^2);
 
     %% solve
     EDMD.ops = sdpsettings('solver', 'mosek', 'verbose', 0);

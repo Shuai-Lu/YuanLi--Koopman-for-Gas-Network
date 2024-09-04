@@ -1,6 +1,6 @@
 function func_readdata(filename)
 %%
-fprintf('%-40s\t\t', '- Reading data ...');
+fprintf('%-40s\n', '- Reading data ...');
 t0 = clock;
 
 %%
@@ -12,10 +12,10 @@ global data;
     deal(1,2,3,4);
 
 %%
-Min = xlsread(filename,sheet_Min,'B10:BB10000');
-Pin = xlsread(filename,sheet_Pin,'B10:BB10000');
-Mout = xlsread(filename,sheet_Mout,'B10:BB10000');
-Pout = xlsread(filename,sheet_Pout,'B10:BB10000');
+Min = xlsread(filename,sheet_Min,'B10:BB50502');
+Pin = xlsread(filename,sheet_Pin,'B10:BB50502');
+Mout = xlsread(filename,sheet_Mout,'B10:BB50502');
+Pout = xlsread(filename,sheet_Pout,'B10:BB50502');
 
 
 %%

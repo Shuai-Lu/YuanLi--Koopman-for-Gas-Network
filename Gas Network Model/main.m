@@ -6,28 +6,31 @@ warning off;
 global data model;
 
 %% read data
-
-filename = 'testdata_t60'; 
+filename = 'testdata_t15'; 
 func_readdata(filename); % 1-updata, 0-remain
-
 num_pipeline = size(data.var.Min,2);% 50个管道
 
-num_trainingsample = 800;% delta_t = 30,换成1600；delta_t = 15,换成3200；
+set_num_trainingsample = 8/10 * [49800/4 49800/2 49800];
+set_num_testsample = 2/10 * [49800/4 49800/2 49800];
+set_model_order_x = [3 3 3];
+set_model_order_u = [2 2 2];
+if strcmp(filename(end-1:end), '60')
+    idx = 1;
+elseif strcmp(filename(end-1:end), '30')
+    idx = 2;
+elseif strcmp(filename(end-1:end), '15')
+    idx = 3;
+end
 
-num_testsample = 800; % delta_t = 30,换成1600；delta_t = 15,换成3200；
-
-nd_t15 = 4;nd_t30 = 3;nd_t60 = 2;
-
-nd_u15 = 2;nd_u30 = 2;nd_u60 = 2;
-
-nd = nd_t60; % 不同delta_t, 换
-model_order_u = nd_u60;
-model_order = nd + 1;
+num_trainingsample = set_num_trainingsample(idx);
+num_testsample = set_num_testsample(idx);
+model_order_x = set_model_order_x(idx);
+model_order_u = set_model_order_u(idx);
 
 %%
 data.settings.num_trainingsample = num_trainingsample;
 data.settings.num_testsample = num_testsample;
-data.settings.model_order = model_order;
+data.settings.model_order_x = model_order_x;
 data.settings.model_order_u = model_order_u;
 
 %% data processing
@@ -41,8 +44,10 @@ end
 
 %% normalization
 fprintf('%s\n', '------------------- Normalization ----------------------');
-model.data.basevalue_M = 5;
+% 5e6 & 10 is Ok.
 model.data.basevalue_P = 5e6;
+model.data.basevalue_M = 10;
+
 
 for k_pipeline = 1 : num_pipeline
     model.data.pipeline(k_pipeline,1).Min_normalized = ...
@@ -54,14 +59,6 @@ for k_pipeline = 1 : num_pipeline
     model.data.pipeline(k_pipeline,1).Pout_normalized = ...
         model.data.pipeline(k_pipeline,1).Pout/model.data.basevalue_P;
 
-    % model.data.pipeline(k_pipeline,1).Min_normalized = ...
-    %     mapminmax(model.data.pipeline(k_pipeline,1).Min, 0, 1);
-    % model.data.pipeline(k_pipeline,1).Mout_normalized = ...
-    %     mapminmax(model.data.pipeline(k_pipeline,1).Mout, 0, 1);
-    % model.data.pipeline(k_pipeline,1).Pin_normalized = ...
-    %     mapminmax(model.data.pipeline(k_pipeline,1).Pin, 0, 1);
-    % model.data.pipeline(k_pipeline,1).Pout_normalized = ...
-    %     mapminmax(model.data.pipeline(k_pipeline,1).Pout, 0, 1);
 end
 
 %% --------------------------------------------
@@ -69,4 +66,12 @@ end
 func_model_based_on_EDMD();
 
 %% ---------------- Save Matrix --------------------------
-% save('Koopman_Matrix_t60.mat', 'model');
+% 
+% model1.data = [];
+% model1.verify = [];
+% for i = 1:19
+%     model1.EDMD(i).cons = [];
+%     model1.EDMD(i).var.A = model.EDMD(i).var.A;
+%     model1.EDMD(i).var.B = model.EDMD(i).var.B;
+% end
+% save('Koopman_Matrix_t15_wrong.mat', 'model1');
