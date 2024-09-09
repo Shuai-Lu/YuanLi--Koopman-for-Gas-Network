@@ -1,11 +1,13 @@
-Koopman-based Gas Network Model and Economic Dispatch
+# Koopman Operator-based Gas Network Model for Optimal Dispatch
+
+## Description
 This repository contains MATLAB code for modeling gas networks using Koopman operators and performing economic dispatch based on the trained model.
 
 1. Overview
 The project is divided into two main components:
 
 1.1 Gas Network Model:
-- This module is designed to train the Koopman operator for a gas network.
+- This module is designed to get the Koopman operator for a gas network.
 - The main script to run is main.m.
 - Running main.m will generate the Koopman_matrix, which contains the trained Koopman operator.
 
